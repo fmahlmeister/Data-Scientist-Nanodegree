@@ -8,7 +8,7 @@ This repository contains projects for Udacity's [Data Scientist Nanodegree](http
 
 Learn the data science process, including how to build effective data visualizations, and how to communicate with various stakeholders.
 
-- Project: [Write a Data Science blog post]()
+- Project: [Write a Data Science blog post](https://github.com/fmahlmeister/Data-Scientist-Nanodegree/blob/master/2.Introduction-to-Data-Science/Predicting%20House%20Sales%20prices.ipynb)
 
 ### Part 2: Software Engineering for Data Scientists
 Develop software engineering skills that are essential for data scientists, such as creating unit tests and building classes.
