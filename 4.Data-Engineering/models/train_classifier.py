@@ -13,7 +13,7 @@ from nltk.tokenize import RegexpTokenizer
 
 import pickle
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -21,11 +21,11 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.svm import LinearSVC
 
-def load_data(database_filepath):
+def load_data(database_filepath, table_name='DisasterResponse'):
 
 	# load data from database
-	engine = create_engine('sqlite:///data/DisasterResponse.db')
-	df = pd.read_sql_table('DisasterResponse', con=engine)
+    engine = create_engine('sqlite:///' + database_filepath)
+    df = pd.read_sql_table(table_name, con=engine)
 	X = df.loc[:,'message']
 	Y = df.iloc[:,4:]
 	category_names = Y.columns
@@ -47,6 +47,46 @@ def tokenize(text):
     token_words = [WordNetLemmatizer().lemmatize(word, pos='v') for word in token_words]
     
     return token_words
+
+
+def save_stats(X, Y, category_names, vocabulary_stats_filepath, category_stats_filepath):
+    
+    """Save stats
+    Args;
+        X: numpy.ndarray. Disaster messages.
+        Y: numpy.ndarray. Disaster categories for each messages.
+        category_names: Disaster category names.
+        vocaburary_stats_filepath: String. Vocaburary stats is saved as pickel into this file.
+        category_stats_filepath: String. Category stats is saved as pickel into this file.
+    """
+
+    # Check vocabulary
+    vect = CountVectorizer(tokenizer=tokenize)
+    X_vectorized = vect.fit_transform(X)
+
+    # Convert vocabulary into pandas.dataframe
+    keys, values = [], []
+    for k, v in vect.vocabulary_.items():
+        keys.append(k)
+        values.append(v)
+    vocabulary_df = pd.DataFrame.from_dict({'words': keys, 'counts': values})
+
+    # Vocabulary stats
+    vocabulary_df = vocabulary_df.sample(30, random_state=42).sort_values('counts', ascending=False)
+    vocabulary_counts = list(vocabulary_df['counts'])
+    vocabulary_words = list(vocabulary_df['words'])
+
+    # Save vocaburaly stats
+    with open(vocabulary_stats_filepath, 'wb') as vocabulary_stats_file:
+        pickle.dump((vocabulary_counts, vocabulary_words), vocabulary_stats_file)
+
+    # Category stats
+    category_counts = list(Y.sum(axis=0))
+
+    # Save category stats
+    with open(category_stats_filepath, 'wb') as category_stats_file:
+        pickle.dump((category_counts, list(category_names)), category_stats_file)
+
 
 
 def build_model():
@@ -99,11 +139,14 @@ def save_model(model, model_filepath):
 
 
 def main():
-    if len(sys.argv) == 3:
-        database_filepath, model_filepath = sys.argv[1:]
+    if len(sys.argv) == 5:
+        database_filepath, model_filepath, vocabulary_filepath, category_filepath  = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+
+        print('Saving stats...')
+        save_stats(X, Y, category_names, vocabulary_filepath, category_filepath)
         
         print('Building model...')
         model = build_model()
@@ -123,7 +166,8 @@ def main():
         print('Please provide the filepath of the disaster messages database '\
               'as the first argument and the filepath of the pickle file to '\
               'save the model to as the second argument. \n\nExample: python '\
-              'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
+              'train_classifier.py ../data/DisasterResponse.db classifier.pkl '\
+              'vocabulary_stats.pkl category_stats.pkl')
 
 
 if __name__ == '__main__':
