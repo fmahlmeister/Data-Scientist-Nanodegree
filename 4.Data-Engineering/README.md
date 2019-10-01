@@ -18,7 +18,6 @@
 - [Conclusion](#conclusion)
 - [Files](#files)
 - [Software Requirements](#sw)
-- [Credits and Acknowledgements](#credits)
 
 ***
 
