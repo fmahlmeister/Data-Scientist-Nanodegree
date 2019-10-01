@@ -7,6 +7,23 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+
+  """
+  Load disaster messages and categories into dataframe
+
+  Parameters
+  ----------
+  messages_filepath : str
+    csv file which contains disaster messages
+  categories_filepath : str
+    csv file which contains disaster categories for each messages
+
+  Returns
+  -------
+  df : pandas.DataFrame
+    Both csv files data merged into a DataFrame
+  """
+
   # load messages dataset
   messages = pd.read_csv(messages_filepath)
 
@@ -21,6 +38,20 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+
+  """
+  Clean the data
+
+  Parameters
+  ----------
+  df : pandas.DataFrame
+    DataFrame containing disaster messages and categories
+
+  Returns
+  -------
+  df : pandas.DataFrame
+    Cleaned DataFrame
+  """
 
   # create a dataframe of individual category columns  
   categories = df.categories.str.split(';',expand=True)
@@ -56,6 +87,23 @@ def clean_data(df):
 
 def save_data(df, database_filename, table_name='DisasterResponse'):
 
+  """
+  Save data into database
+
+  Parameters
+  ----------
+  df : pandas.DataFrame
+    Cleaned DataFrame
+  database_filename : str
+    Dataframe is saved into this database file
+  table_name : str (optional)
+    Dataframe is saved into this table on database
+
+  Returns
+  -------
+
+  """
+
   engine = create_engine('sqlite:///' + database_filename)
   df.to_sql(table_name, engine, index=False, if_exists='replace', chunksize=600)
 
@@ -82,9 +130,9 @@ def main():
         print('Please provide the filepaths of the messages and categories '\
               'datasets as the first and second argument respectively, as '\
               'well as the filepath of the database to save the cleaned data '\
-              'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
-              'DisasterResponse.db')
+              'to as the third argument. \n\nExample: python data/process_data.py '\
+              'data/disaster_messages.csv data/disaster_categories.csv '\
+              'data/DisasterResponse.db')
 
 
 if __name__ == '__main__':

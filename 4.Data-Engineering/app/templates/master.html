@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
@@ -22,55 +22,71 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li><a href="https://www.udacity.com/">Made with Udacity</a></li>
-                <li><a href="https://github.com/">Contact</a></li>
+                <li><a href="https://github.com/fmahlmeister/Data-Scientist-Nanodegree/tree/master/4.Data-Engineering">GitHub</a></li>
+                <li><a href="https://www.linkedin.com/in/felipe-mahlmeister/">Contact</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
 
-<div class="jumbotron">
-    <div class="container">
-        <h1 class="text-center">Disaster Response Project</h1>
-        <p class="text-center">Analyzing message data for disaster response</p>
-        <hr />
-      
-        <div class="row">
-            <div class="col-lg-12 form-group-lg">
-                <form action="/go" method="get">
-                    <input type="text" class="form-control form-control-lg" name="query" placeholder="Enter a message to classify">
-                    <div class="col-lg-offset-5">
-                        <button type="submit" class="btn btn-lg btn-success">Classify Message</button>
-                    </div>
-                </form>
+<div class="container-fluid">
+    <div class="jumbotron">
+        <div class="container">
+            <h1 class="text-center">Disaster Response Project</h1>
+            <p class="text-center">Analyzing message data for disaster response</p>
+            <hr />
+          
+            <div class="row">
+                <div class="col-lg-12 form-group-lg">
+                    <form action="/go" method="get">
+                        <input type="text" class="form-control form-control-lg" name="query" placeholder="Enter a message to classify">
+                        <div class="col-lg-offset-5">
+                            <button type="submit" class="btn btn-lg btn-success">Classify Message</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
 
-        {% block message %}
+            {% block message %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <div class="container" id="graphs">
+        {% block content %}
+            <div class="page-header">
+                <h1 class="text-center">Overview of Training Dataset</h1>
+            </div>
         {% endblock %}
+
+        {% for id in ids %}
+            <div id="{{id}}"></div>
+        {% endfor %}
     </div>
 </div>
 
-<div class="container">
-    {% block content %}
-        <div class="page-header">
-            <h1 class="text-center">Overview of Training Dataset</h1>
-        </div>
-    {% endblock %}
+<footer class="footer">
+    <div class="container">
 
-    {% for id in ids %}
-        <div id="{{id}}"></div>
-    {% endfor %}
-</div>
+    </div>
+</footer>
 
 <script type="text/javascript">
     const graphs = {{graphJSON | safe}};
     const ids = {{ids | safe}};
-    for(let i in graphs) {
+    for (let i in graphs) {
         Plotly.plot(ids[i], graphs[i].data, graphs[i].layout);
     }
 </script>
+
+<style>
+    .footer {
+        bottom:0;
+        width: 100%;
+        height: 100px;
+    }
+</style>
 
 </body>
 </html>

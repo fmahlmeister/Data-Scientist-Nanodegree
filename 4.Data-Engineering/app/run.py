@@ -8,7 +8,7 @@ from nltk.tokenize import word_tokenize
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from sklearn.externals import joblib
+from joblib import dump, load
 from sqlalchemy import create_engine
 
 
@@ -30,7 +30,7 @@ engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('DisasterResponse', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+model = load("../models/classifier.pkl")
 
 
 # index webpage displays cool visuals and receives user input text for model
@@ -39,14 +39,18 @@ model = joblib.load("../models/classifier.pkl")
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+
+    # Top five categories count
+    top_category_count = df.iloc[:,4:].sum().sort_values(ascending=False)[1:11]
+    top_category_names = list(top_category_count.index)
     
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
-        {
+
+        # GRAPH 1 - genre graph
+    	{
             'data': [
                 Bar(
                     x=genre_names,
@@ -61,6 +65,25 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+
+        # GRAPH 2 - category graph
+        {
+            'data': [
+                Bar(
+                    x=top_category_names,
+                    y=top_category_count
+                )
+            ],
+            'layout': {
+                'title': 'Top 10 Message Categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'tickangle':-45
                 }
             }
         }
@@ -84,7 +107,7 @@ def go():
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[4:], classification_labels))
 
-    # This will render the go.html Please see that file. 
+    # This will render the go.html
     return render_template(
         'go.html',
         query=query,
@@ -93,7 +116,7 @@ def go():
 
 
 def main():
-    app.run(host='0.0.0.0', port=3001, debug=True)
+    app.run(host='127.0.0.1', port=8000, debug=True)
 
 
 if __name__ == '__main__':
